@@ -2,33 +2,34 @@
 <html lang="bn">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>arian00001 • 3D Toy Universe</title>
-  <!-- Lucide icons (static copy) -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>arian00001 - 3D Toy Universe</title>
+  
+  <!-- Font load dynamic head code -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Lucide Icons via CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Fonts: Anton + Inter -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            anton: ['Anton', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      font-family: 'Inter', sans-serif;
-      background: #111;
-      overflow: hidden;
-      height: 100vh;
-      width: 100vw;
-    }
-    .font-anton {
-      font-family: 'Anton', sans-serif;
-    }
-    .font-inter {
-      font-family: 'Inter', sans-serif;
-    }
     .figurine-shadow {
       filter: drop-shadow(0 25px 35px rgba(0, 0, 0, 0.45));
     }
@@ -40,33 +41,173 @@
     .float-active {
       animation: float 4.5s ease-in-out infinite;
     }
-    #app-root {
-      width: 100%;
-      height: 100%;
-    }
-    /* custom resets for buttons */
-    button {
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-family: inherit;
-      outline: none;
-    }
-    a {
-      text-decoration: none;
-      color: inherit;
-    }
   </style>
 </head>
-<body>
-  <div id="app-root"></div>
+<body class="font-sans antialiased m-0 p-0 overflow-hidden select-none">
 
-  <script type="module">
-    import React, { useState, useEffect, useRef } from 'https://esm.sh/react@18';
-    import { createRoot } from 'https://esm.sh/react-dom@18/client';
-    import { ArrowLeft, ArrowRight, Sparkles, ShoppingBag, Share2, Heart, Play, Pause } from 'https://esm.sh/lucide-react@0.263.1';
+  <!-- Main Full Viewport Carousel Container -->
+  <div 
+    id="main-container"
+    class="relative w-full h-screen overflow-hidden transition-colors duration-[650ms] ease-[cubic-bezier(0.4,0,0.2,1)] cursor-grab active:cursor-grabbing"
+    style="background-color: #F4845F;"
+  >
+    
+    <!-- 1. Film Grain Screen Overlay -->
+    <div 
+      class="absolute inset-0 pointer-events-none z-[50]"
+      style="
+        background-image: url(&quot;data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E&quot;);
+        background-size: 200px 200px;
+        opacity: 0.08;
+      "
+    ></div>
 
-    // ----- Character data (unchanged) -----
+    <!-- UI Core Layout Wrapper -->
+    <div class="relative w-full h-full overflow-hidden flex flex-col justify-between p-4 sm:p-8">
+      
+      <!-- Header Navigation Bar -->
+      <header class="flex justify-between items-center z-[60] w-full mt-2 sm:mt-0">
+        
+        <!-- Logo & Brand Details -->
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-white p-1 flex items-center justify-center shadow-md overflow-hidden">
+            <img 
+              src="https://i.ibb.co.com/k285MgPt/Picsart-26-06-10-00-26-14-559.png" 
+              alt="arian00001 logo" 
+              class="w-full h-full object-contain"
+            />
+          </div>
+          <div class="flex flex-col">
+            <span class="text-sm font-black uppercase text-white tracking-[0.18em] leading-none">
+              arian00001
+            </span>
+            <span class="text-[9px] text-white/80 font-semibold tracking-wider mt-0.5">
+              3D TOY UNIVERSE
+            </span>
+          </div>
+        </div>
+
+        <!-- Interactive Right Controls -->
+        <div class="flex items-center gap-3">
+          
+          <!-- AutoPlay / Auto-Slide Toggle Button -->
+          <button 
+            id="autoplay-btn"
+            class="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-white bg-white/20 transition-all duration-200"
+            title="Auto-slide Pause korun"
+          >
+            <i data-lucide="pause" class="w-4 h-4"></i>
+          </button>
+
+          <!-- Favorite Like Button -->
+          <button 
+            id="like-btn"
+            class="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-white hover:bg-white/10 active:scale-90 transition-all duration-200"
+            aria-label="Like Toy"
+          >
+            <i id="like-icon" data-lucide="heart" class="w-5 h-5 transition-transform duration-300"></i>
+          </button>
+
+          <!-- Share Button -->
+          <button 
+            class="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-white hover:bg-white/10 active:scale-90 transition-all duration-200"
+            aria-label="Share"
+          >
+            <i data-lucide="share-2" class="w-5 h-5"></i>
+          </button>
+
+          <!-- Desktop Pre-order Box -->
+          <button class="hidden md:flex items-center gap-2 bg-white text-neutral-900 font-semibold px-5 py-2.5 rounded-full shadow-lg text-sm hover:bg-neutral-100 transition-all active:scale-95">
+            <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+            <span>PRE-ORDER BOX</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- 2. Giant Background Text "3D SHAPE" -->
+      <div class="absolute inset-x-0 flex items-center justify-center pointer-events-none select-none z-[2]" style="top: 18%;">
+        <span 
+          class="font-anton uppercase tracking-[-0.02em] leading-none whitespace-nowrap text-white text-[90px] sm:text-[28vw] md:text-[380px]"
+          style="opacity: 0.15;"
+        >
+          arian00001
+        </span>
+      </div>
+
+      <!-- Dynamic Side Metadata Display (Only on Desktop) -->
+      <div class="absolute top-[34%] left-12 hidden lg:flex flex-col gap-1 z-[1] pointer-events-none text-white/20">
+        <span class="text-[10px] tracking-widest uppercase">CATALOGUE S-NO //</span>
+        <span id="meta-serial" class="font-anton text-4xl">AR-001</span>
+        <span id="meta-edition" class="text-[10px] tracking-widest mt-2">Prothom Edition 1/500</span>
+      </div>
+
+      <!-- 4. 3D Toy Figures Carousel Container -->
+      <div id="carousel-viewport" class="absolute inset-0 z-[3] overflow-hidden pointer-events-none">
+        <!-- JS code dynamic vabe element gulo populate/update korbe -->
+      </div>
+
+      <!-- Footer Control Panel -->
+      <div class="relative w-full flex flex-col sm:flex-row justify-between items-end z-[60] mt-auto pb-4 sm:pb-0">
+        
+        <!-- Left text details -->
+        <div class="max-w-[320px] text-white flex flex-col items-start w-full sm:mb-8 sm:ml-16">
+          
+          <!-- Slider Index Numbers -->
+          <div class="flex items-center gap-2 mb-1 opacity-75">
+            <span id="active-num" class="text-[11px] font-bold tracking-widest">01</span>
+            <div class="w-8 h-[2px] bg-white/40"></div>
+            <span id="total-num" class="text-[11px] font-bold tracking-widest opacity-60">04</span>
+          </div>
+
+          <!-- Bottom Main Title -->
+          <h2 class="text-xl sm:text-[22px] font-extrabold uppercase tracking-widest mb-2 sm:mb-3 opacity-[0.95] drop-shadow-sm">
+            arian00001 figurines
+          </h2>
+
+          <!-- Descriptive Text -->
+          <p class="hidden sm:block text-xs sm:text-sm text-white/85 leading-relaxed mb-4 sm:mb-5 drop-shadow-sm font-medium">
+            Ei toy figurine-gulo khubee darun! Eder premium build quality ebong nikhut high-definition design chokh jorano. Ekhoni apnar favorite character-ti collect korun!
+          </p>
+
+          <!-- Interactive Drag Helper Text (No buttons anymore) -->
+          <div class="flex items-center gap-2 text-white/70 text-xs tracking-widest py-2 px-3 bg-white/10 rounded-full backdrop-blur-sm pointer-events-none">
+            <i data-lucide="move-horizontal" class="w-4 h-4 animate-pulse"></i>
+            <span>HAT DIYE SWIPE BA DRAG KORUN</span>
+          </div>
+        </div>
+
+        <!-- Right Side Discover Action Link -->
+        <div class="mt-6 sm:mt-0 sm:mb-8 sm:mr-6 w-full sm:w-auto flex justify-end pointer-events-auto">
+          <a
+            href="#discover"
+            class="group flex items-center gap-3 text-white transition-all duration-200 hover:opacity-100 opacity-95 no-underline active:scale-98"
+            id="discover-link"
+          >
+            <span 
+              class="font-anton uppercase tracking-[-0.02em] leading-none text-2xl sm:text-[4.5vw] md:text-[56px]"
+            >
+              DEKHUN EKHONI
+            </span>
+            <div class="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-white/10 group-hover:bg-white text-white group-hover:text-neutral-950 flex items-center justify-center transition-all duration-300 transform group-hover:translate-x-1.5 shadow-md border border-white/20 group-hover:border-transparent">
+              <i data-lucide="arrow-right" class="w-5 h-5 sm:w-8 sm:h-8"></i>
+            </div>
+          </a>
+        </div>
+
+      </div>
+
+      <!-- Navigation dots overlay indicators -->
+      <div id="dots-container" class="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex items-center gap-2 z-[60] pointer-events-auto">
+        <!-- JS generates dots dynamics here -->
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- JavaScript and Interactions -->
+  <script>
+    // Data List
     const IMAGES = [
       { 
         src: 'https://fifth-gentle-45902158.figma.site/_components/v2/4de492f6d9cf8244ad5293233e5c6f52407d42fc/1.02464a56.png', 
@@ -88,7 +229,7 @@
         src: 'https://fifth-gentle-45902158.figma.site/_components/v2/4de492f6d9cf8244ad5293233e5c6f52407d42fc/3.4df853b4.png', 
         bg: '#E882B4', 
         panel: '#ED9DC4',
-        name: "LIL' MONSTER",
+        name: 'LIL\' MONSTER',
         id: 'AR-003',
         edition: 'Limited Holographic'
       },
@@ -102,324 +243,348 @@
       },
     ];
 
-    function App() {
-      const [activeIndex, setActiveIndex] = useState(0);
-      const [isAnimating, setIsAnimating] = useState(false);
-      const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
-      const [liked, setLiked] = useState(Array(IMAGES.length).fill(false));
-      const [autoPlay, setAutoPlay] = useState(true);
-      const touchStartX = useRef(null);
+    // Carousel State Variables
+    let activeIndex = 0;
+    let isAnimating = false;
+    let isMobile = window.innerWidth < 640;
+    let autoPlay = true;
+    let liked = Array(IMAGES.length).fill(false);
+    let autoPlayTimer = null;
 
-      // resize handler
-      useEffect(() => {
-        const handleResize = () => setIsMobile(window.innerWidth < 640);
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-      }, []);
+    // Drag-swipe Tracking variables (Unified for mobile & desktop)
+    let dragStartX = 0;
+    let isDragging = false;
 
-      // preload images
-      useEffect(() => {
-        IMAGES.forEach((img) => {
-          const image = new Image();
-          image.src = img.src;
-        });
-      }, []);
+    // Elements Selectors
+    const mainContainer = document.getElementById('main-container');
+    const carouselViewport = document.getElementById('carousel-viewport');
+    const dotsContainer = document.getElementById('dots-container');
+    const activeNum = document.getElementById('active-num');
+    const totalNum = document.getElementById('total-num');
+    const metaSerial = document.getElementById('meta-serial');
+    const metaEdition = document.getElementById('meta-edition');
+    const likeBtn = document.getElementById('like-btn');
+    const likeIcon = document.getElementById('like-icon');
+    const autoplayBtn = document.getElementById('autoplay-btn');
+    const discoverLink = document.getElementById('discover-link');
 
-      // auto-slide
-      useEffect(() => {
-        if (!autoPlay) return;
-        const timer = setInterval(() => {
-          if (!isAnimating) navigate('next');
-        }, 4000);
-        return () => clearInterval(timer);
-      }, [activeIndex, isAnimating, autoPlay]);
+    // Preload Images
+    IMAGES.forEach(imgData => {
+      const img = new Image();
+      img.src = imgData.src;
+    });
 
-      const navigate = (direction) => {
-        if (isAnimating) return;
-        setIsAnimating(true);
-        setActiveIndex((prev) => {
-          if (direction === 'next') return (prev + 1) % IMAGES.length;
-          return (prev + IMAGES.length - 1) % IMAGES.length;
-        });
-        setTimeout(() => setIsAnimating(false), 650);
-      };
+    // Detect screen width resize
+    window.addEventListener('resize', () => {
+      isMobile = window.innerWidth < 640;
+      renderCarousel();
+    });
 
-      // keyboard
-      useEffect(() => {
-        const handleKey = (e) => {
-          if (e.key === 'ArrowRight') navigate('next');
-          if (e.key === 'ArrowLeft') navigate('prev');
-        };
-        window.addEventListener('keydown', handleKey);
-        return () => window.removeEventListener('keydown', handleKey);
-      }, [isAnimating]);
+    // Initial setup of structural cards inside viewport
+    function createCarouselStructure() {
+      carouselViewport.innerHTML = '';
+      IMAGES.forEach((item, index) => {
+        const card = document.createElement('div');
+        card.id = `card-${index}`;
+        card.className = 'absolute pointer-events-none transition-all duration-[650ms] ease-[cubic-bezier(0.4,0,0.2,1)]';
+        card.style.aspectRatio = '0.6 / 1';
+        card.style.willChange = 'transform, filter, opacity, left, bottom, height';
 
-      // touch
-      const handleTouchStart = (e) => {
-        touchStartX.current = e.touches[0].clientX;
-      };
-      const handleTouchEnd = (e) => {
-        if (touchStartX.current === null) return;
-        const diff = touchStartX.current - e.changedTouches[0].clientX;
-        if (Math.abs(diff) > 50) {
-          if (diff > 0) navigate('next');
-          else navigate('prev');
-        }
-        touchStartX.current = null;
-      };
+        card.innerHTML = `
+          <div id="float-container-${index}" class="relative w-full h-full flex flex-col justify-end items-center">
+            
+            <!-- Pedestal/Base Shadow Plate -->
+            <div 
+              id="pedestal-${index}"
+              class="absolute bottom-0 rounded-full blur-sm transition-all duration-500"
+              style="width: 85%; height: 24px;"
+            ></div>
 
-      const toggleLike = (index) => {
-        setLiked(prev => {
-          const updated = [...prev];
-          updated[index] = !updated[index];
-          return updated;
-        });
-      };
+            <!-- Main High Resolution 3D Figurine Asset -->
+            <img 
+              src="${item.src}" 
+              alt="${item.name}" 
+              draggable="false"
+              class="relative z-10 w-full h-full object-contain object-bottom select-none figurine-shadow"
+            />
 
-      const getRole = (index) => {
-        if (index === activeIndex) return 'center';
-        if (index === (activeIndex + 3) % IMAGES.length) return 'left';
-        if (index === (activeIndex + 1) % IMAGES.length) return 'right';
-        return 'back';
-      };
-
-      const activeData = IMAGES[activeIndex];
-
-      return (
-        <div 
-          className="relative w-full h-screen overflow-hidden font-inter select-none"
-          style={{
-            backgroundColor: activeData.bg,
-            transition: 'background-color 650ms cubic-bezier(0.4, 0, 0.2, 1)',
-          }}
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
-        >
-          {/* film grain overlay */}
-          <div 
-            className="absolute inset-0 pointer-events-none z-[50]"
-            style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-              backgroundSize: '200px 200px',
-              opacity: 0.08,
-            }}
-          />
-
-          <div className="relative w-full h-full overflow-hidden flex flex-col justify-between p-4 sm:p-8">
-            {/* Header */}
-            <div className="flex justify-between items-center z-[60] w-full mt-2 sm:mt-0">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-white p-1 flex items-center justify-center shadow-md overflow-hidden">
-                  <img 
-                    src="https://i.ibb.co.com/k285MgPt/Picsart-26-06-10-00-26-14-559.png" 
-                    alt="arian00001 logo" 
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-sm font-black uppercase text-white tracking-[0.18em] leading-none">arian00001</span>
-                  <span className="text-[9px] text-white/80 font-semibold tracking-wider mt-0.5">3D TOY UNIVERSE</span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <button 
-                  onClick={() => setAutoPlay(!autoPlay)}
-                  className={`w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-white transition-all duration-200 ${autoPlay ? 'bg-white/20' : 'hover:bg-white/10'}`}
-                  title={autoPlay ? "Auto-slide Pause" : "Auto-slide Play"}
-                >
-                  {autoPlay ? React.createElement(Pause, {className:"w-4 h-4"}) : React.createElement(Play, {className:"w-4 h-4 fill-white"})}
-                </button>
-                <button 
-                  onClick={() => toggleLike(activeIndex)}
-                  className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-white hover:bg-white/10 active:scale-90 transition-all duration-200"
-                >
-                  {React.createElement(Heart, {
-                    className: `w-5 h-5 transition-transform duration-300 ${liked[activeIndex] ? 'fill-white scale-125' : ''}`
-                  })}
-                </button>
-                <button className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-white hover:bg-white/10 active:scale-90 transition-all duration-200">
-                  {React.createElement(Share2, {className:"w-5 h-5"})}
-                </button>
-                <button className="hidden md:flex items-center gap-2 bg-white text-neutral-900 font-semibold px-5 py-2.5 rounded-full shadow-lg text-sm hover:bg-neutral-100 transition-all active:scale-95">
-                  {React.createElement(ShoppingBag, {className:"w-4 h-4"})}
-                  <span>PRE-ORDER BOX</span>
-                </button>
-              </div>
+            <!-- Name Tag HUD over active character -->
+            <div 
+              id="tag-${index}"
+              class="absolute -bottom-5 sm:-bottom-8 z-30 flex flex-col items-center bg-white/10 backdrop-blur-md border border-white/25 px-3 py-1 rounded-full text-white text-[10px] tracking-widest font-semibold uppercase animate-pulse shadow-md transition-opacity duration-300 opacity-0"
+            >
+              ${item.name}
             </div>
 
-            {/* giant bg text */}
-            <div className="absolute inset-x-0 flex items-center justify-center pointer-events-none select-none z-[2]" style={{ top: '18%' }}>
-              <span 
-                className="font-anton uppercase tracking-[-0.02em] leading-none whitespace-nowrap text-white"
-                style={{ fontSize: 'clamp(90px, 28vw, 380px)', opacity: 0.15 }}
-              >
-                3D SHAPE
-              </span>
-            </div>
-
-            {/* left catalogue info (desktop) */}
-            <div className="absolute top-[34%] left-12 hidden lg:flex flex-col gap-1 z-[1] pointer-events-none text-white/20">
-              <span className="text-[10px] tracking-widest uppercase">CATALOGUE S-NO //</span>
-              <span className="font-anton text-4xl">{activeData.id}</span>
-              <span className="text-[10px] tracking-widest mt-2">{activeData.edition}</span>
-            </div>
-
-            {/* Carousel figures */}
-            <div className="absolute inset-0 z-[3] overflow-hidden pointer-events-none">
-              {IMAGES.map((item, index) => {
-                const role = getRole(index);
-                const isActive = role === 'center';
-                let positionStyles = {};
-
-                if (role === 'center') {
-                  positionStyles = {
-                    transform: `translateX(-50%) scale(${isMobile ? 1.25 : 1.68})`,
-                    filter: 'blur(0px)',
-                    opacity: 1,
-                    zIndex: 20,
-                    left: '50%',
-                    height: isMobile ? '60%' : '92%',
-                    bottom: isMobile ? '22%' : '0',
-                  };
-                } else if (role === 'left') {
-                  positionStyles = {
-                    transform: 'translateX(-50%) scale(1)',
-                    filter: 'blur(2.5px)',
-                    opacity: 0.85,
-                    zIndex: 10,
-                    left: isMobile ? '20%' : '30%',
-                    height: isMobile ? '16%' : '28%',
-                    bottom: isMobile ? '32%' : '12%',
-                  };
-                } else if (role === 'right') {
-                  positionStyles = {
-                    transform: 'translateX(-50%) scale(1)',
-                    filter: 'blur(2.5px)',
-                    opacity: 0.85,
-                    zIndex: 10,
-                    left: isMobile ? '80%' : '70%',
-                    height: isMobile ? '16%' : '28%',
-                    bottom: isMobile ? '32%' : '12%',
-                  };
-                } else {
-                  positionStyles = {
-                    transform: 'translateX(-50%) scale(1)',
-                    filter: 'blur(4px)',
-                    opacity: 0.4,
-                    zIndex: 5,
-                    left: '50%',
-                    height: isMobile ? '13%' : '22%',
-                    bottom: isMobile ? '32%' : '12%',
-                  };
-                }
-
-                return (
-                  <div
-                    key={index}
-                    className="absolute pointer-events-auto transition-all cursor-grab active:cursor-grabbing"
-                    style={{
-                      aspectRatio: '0.6 / 1',
-                      willChange: 'transform, filter, opacity, left, bottom, height',
-                      transitionDuration: '650ms',
-                      transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
-                      ...positionStyles,
-                    }}
-                  >
-                    <div className={`relative w-full h-full flex flex-col justify-end items-center ${isActive ? 'float-active' : ''}`}>
-                      <div 
-                        className="absolute bottom-0 rounded-full blur-sm transition-all duration-500"
-                        style={{
-                          width: '85%',
-                          height: '24px',
-                          backgroundColor: item.panel,
-                          opacity: isActive ? 0.95 : 0.4,
-                          transform: isActive ? 'scale(1.15) translateY(4px)' : 'scale(0.85) translateY(0px)',
-                          boxShadow: `0 12px 36px ${item.panel}, 0 -4px 10px rgba(0,0,0,0.2) inset`,
-                          zIndex: 1,
-                        }}
-                      />
-                      <img
-                        src={item.src}
-                        alt={item.name}
-                        draggable={false}
-                        className="relative z-10 w-full h-full object-contain object-bottom select-none figurine-shadow"
-                      />
-                      {isActive && (
-                        <div className="absolute -bottom-5 sm:-bottom-8 z-30 flex flex-col items-center bg-white/10 backdrop-blur-md border border-white/25 px-3 py-1 rounded-full text-white text-[10px] tracking-widest font-semibold uppercase shadow-md">
-                          {item.name}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Footer controls */}
-            <div className="relative w-full flex flex-col sm:flex-row justify-between items-end z-[60] mt-auto pb-4 sm:pb-0">
-              <div className="max-w-[320px] text-white flex flex-col items-start w-full sm:mb-8 sm:ml-16">
-                <div className="flex items-center gap-2 mb-1 opacity-75">
-                  <span className="text-[11px] font-bold tracking-widest">0{activeIndex + 1}</span>
-                  <div className="w-8 h-[2px] bg-white/40" />
-                  <span className="text-[11px] font-bold tracking-widest opacity-60">0{IMAGES.length}</span>
-                </div>
-                <h2 className="text-xl sm:text-[22px] font-extrabold uppercase tracking-widest mb-2 sm:mb-3 opacity-[0.95] drop-shadow-sm">
-                  arian00001 figurines
-                </h2>
-                <p className="hidden sm:block text-xs sm:text-sm text-white/85 leading-relaxed mb-4 sm:mb-5 drop-shadow-sm font-medium">
-                  Ei toy figurine-gulo khubee darun! Eder premium build quality ebong nikhut high-definition design chokh jorano. Ekhoni apnar favorite character-ti collect korun!
-                </p>
-                <div className="flex items-center gap-3.5">
-                  <button onClick={() => navigate('prev')} className="w-12 h-12 sm:w-16 sm:h-16 rounded-full border-2 border-white/90 bg-transparent text-white flex items-center justify-center transition-all duration-200 hover:scale-[1.08] hover:bg-white/15 active:scale-95 shadow-md">
-                    {React.createElement(ArrowLeft, {className:"w-6 h-6 sm:w-[26px] sm:h-[26px]", style:{strokeWidth:2.25}})}
-                  </button>
-                  <button onClick={() => navigate('next')} className="w-12 h-12 sm:w-16 sm:h-16 rounded-full border-2 border-white/90 bg-transparent text-white flex items-center justify-center transition-all duration-200 hover:scale-[1.08] hover:bg-white/15 active:scale-95 shadow-md">
-                    {React.createElement(ArrowRight, {className:"w-6 h-6 sm:w-[26px] sm:h-[26px]", style:{strokeWidth:2.25}})}
-                  </button>
-                </div>
-              </div>
-
-              <div className="mt-6 sm:mt-0 sm:mb-8 sm:mr-6 w-full sm:w-auto flex justify-end">
-                <a href="#discover" onClick={(e) => e.preventDefault()} className="group flex items-center gap-3 text-white transition-all duration-200 hover:opacity-100 opacity-95 no-underline active:scale-98">
-                  <span className="font-anton uppercase tracking-[-0.02em] leading-none" style={{ fontSize: 'clamp(24px, 4.5vw, 56px)' }}>
-                    DEKHUN EKHONI
-                  </span>
-                  <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-white/10 group-hover:bg-white text-white group-hover:text-neutral-950 flex items-center justify-center transition-all duration-300 transform group-hover:translate-x-1.5 shadow-md border border-white/20 group-hover:border-transparent">
-                    {React.createElement(ArrowRight, {className:"w-5 h-5 sm:w-8 sm:h-8", style:{strokeWidth:2.25}})}
-                  </div>
-                </a>
-              </div>
-            </div>
-
-            {/* dot indicators */}
-            <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex items-center gap-2 z-[60]">
-              {IMAGES.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => {
-                    if (!isAnimating) {
-                      setIsAnimating(true);
-                      setActiveIndex(i);
-                      setTimeout(() => setIsAnimating(false), 650);
-                    }
-                  }}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${
-                    i === activeIndex ? 'w-6 bg-white' : 'w-1.5 bg-white/40 hover:bg-white/70'
-                  }`}
-                  aria-label={`Slide ${i+1}`}
-                />
-              ))}
-            </div>
           </div>
-        </div>
-      );
+        `;
+        carouselViewport.appendChild(card);
+      });
+
+      // Initial dots creation
+      dotsContainer.innerHTML = '';
+      IMAGES.forEach((_, i) => {
+        const dot = document.createElement('button');
+        dot.className = 'h-1.5 rounded-full transition-all duration-300';
+        dot.setAttribute('aria-label', `Slide e jan ${i + 1}`);
+        dot.addEventListener('click', () => {
+          if (!isAnimating) {
+            triggerNavigation(() => activeIndex = i);
+          }
+        });
+        dotsContainer.appendChild(dot);
+      });
     }
 
-    // Mount React app
-    const container = document.getElementById('app-root');
-    const root = createRoot(container);
-    root.render(React.createElement(App));
+    // Role calculations
+    function getRole(index) {
+      if (index === activeIndex) return 'center';
+      if (index === (activeIndex + 3) % IMAGES.length) return 'left';
+      if (index === (activeIndex + 1) % IMAGES.length) return 'right';
+      return 'back';
+    }
+
+    // Render roles, apply sizes, transforms, blurs, opacities
+    function renderCarousel() {
+      // Dynamic counter numbers
+      activeNum.textContent = `0${activeIndex + 1}`;
+      totalNum.textContent = `0${IMAGES.length}`;
+
+      // Update background colors
+      const activeData = IMAGES[activeIndex];
+      mainContainer.style.backgroundColor = activeData.bg;
+
+      // Update metadata text panels
+      if (metaSerial) metaSerial.textContent = activeData.id;
+      if (metaEdition) metaEdition.textContent = activeData.edition;
+
+      // Update like button icon
+      if (liked[activeIndex]) {
+        likeIcon.classList.add('fill-white', 'scale-125');
+      } else {
+        likeIcon.classList.remove('fill-white', 'scale-125');
+      }
+
+      // Loop to reposition characters
+      IMAGES.forEach((item, index) => {
+        const card = document.getElementById(`card-${index}`);
+        const floatContainer = document.getElementById(`float-container-${index}`);
+        const pedestal = document.getElementById(`pedestal-${index}`);
+        const tag = document.getElementById(`tag-${index}`);
+        
+        if (!card) return;
+
+        const role = getRole(index);
+        const isActive = role === 'center';
+
+        // Floating dynamic animation apply
+        if (isActive) {
+          floatContainer.classList.add('float-active');
+          tag.classList.remove('opacity-0');
+          tag.classList.add('opacity-100');
+        } else {
+          floatContainer.classList.remove('float-active');
+          tag.classList.remove('opacity-100');
+          tag.classList.add('opacity-0');
+        }
+
+        // Apply dynamic styles based on role and screen scale
+        if (role === 'center') {
+          card.style.transform = `translateX(-50%) scale(${isMobile ? 1.25 : 1.68})`;
+          card.style.filter = 'blur(0px)';
+          card.style.opacity = '1';
+          card.style.zIndex = '20';
+          card.style.left = '50%';
+          card.style.height = isMobile ? '60%' : '92%';
+          card.style.bottom = isMobile ? '22%' : '0';
+
+          // Active pedestal styling
+          pedestal.style.backgroundColor = item.panel;
+          pedestal.style.opacity = '0.95';
+          pedestal.style.transform = 'scale(1.15) translateY(4px)';
+          pedestal.style.boxShadow = `0 12px 36px ${item.panel}, 0 -4px 10px rgba(0,0,0,0.2) inset`;
+
+        } else if (role === 'left') {
+          card.style.transform = 'translateX(-50%) scale(1)';
+          card.style.filter = 'blur(2.5px)';
+          card.style.opacity = '0.85';
+          card.style.zIndex = '10';
+          card.style.left = isMobile ? '20%' : '30%';
+          card.style.height = isMobile ? '16%' : '28%';
+          card.style.bottom = isMobile ? '32%' : '12%';
+
+          // Passive pedestal styling
+          pedestal.style.backgroundColor = item.panel;
+          pedestal.style.opacity = '0.4';
+          pedestal.style.transform = 'scale(0.85) translateY(0px)';
+          pedestal.style.boxShadow = `0 12px 36px ${item.panel}, 0 -4px 10px rgba(0,0,0,0.2) inset`;
+
+        } else if (role === 'right') {
+          card.style.transform = 'translateX(-50%) scale(1)';
+          card.style.filter = 'blur(2.5px)';
+          card.style.opacity = '0.85';
+          card.style.zIndex = '10';
+          card.style.left = isMobile ? '80%' : '70%';
+          card.style.height = isMobile ? '16%' : '28%';
+          card.style.bottom = isMobile ? '32%' : '12%';
+
+          // Passive pedestal styling
+          pedestal.style.backgroundColor = item.panel;
+          pedestal.style.opacity = '0.4';
+          pedestal.style.transform = 'scale(0.85) translateY(0px)';
+          pedestal.style.boxShadow = `0 12px 36px ${item.panel}, 0 -4px 10px rgba(0,0,0,0.2) inset`;
+
+        } else {
+          // Role: back
+          card.style.transform = 'translateX(-50%) scale(1)';
+          card.style.filter = 'blur(4px)';
+          card.style.opacity = '0.4';
+          card.style.zIndex = '5';
+          card.style.left = '50%';
+          card.style.height = isMobile ? '13%' : '22%';
+          card.style.bottom = isMobile ? '32%' : '12%';
+
+          pedestal.style.backgroundColor = item.panel;
+          pedestal.style.opacity = '0.2';
+          pedestal.style.transform = 'scale(0.85) translateY(0px)';
+          pedestal.style.boxShadow = `none`;
+        }
+      });
+
+      // Update dots styles
+      const dots = dotsContainer.children;
+      for (let i = 0; i < dots.length; i++) {
+        if (i === activeIndex) {
+          dots[i].className = 'h-1.5 w-6 bg-white rounded-full transition-all duration-300';
+        } else {
+          dots[i].className = 'h-1.5 w-1.5 bg-white/40 hover:bg-white/70 rounded-full transition-all duration-300';
+        }
+      }
+    }
+
+    // Navigation and Transition lock trigger
+    function triggerNavigation(indexUpdateFn) {
+      if (isAnimating) return;
+      isAnimating = true;
+      
+      indexUpdateFn();
+      renderCarousel();
+
+      setTimeout(() => {
+        isAnimating = false;
+      }, 650);
+    }
+
+    function navigate(direction) {
+      triggerNavigation(() => {
+        if (direction === 'next') {
+          activeIndex = (activeIndex + 1) % IMAGES.length;
+        } else {
+          activeIndex = (activeIndex + IMAGES.length - 1) % IMAGES.length;
+        }
+      });
+    }
+
+    // Auto Play Interval Setup
+    function startAutoPlay() {
+      stopAutoPlay();
+      if (!autoPlay) return;
+      autoPlayTimer = setInterval(() => {
+        if (!isAnimating) {
+          navigate('next');
+        }
+      }, 4000);
+    }
+
+    function stopAutoPlay() {
+      if (autoPlayTimer) {
+        clearInterval(autoPlayTimer);
+      }
+    }
+
+    // AutoPlay Control toggle Listener
+    autoplayBtn.addEventListener('click', (e) => {
+      e.stopPropagation(); // Click event propagation off jate drag active na hoy
+      autoPlay = !autoPlay;
+      if (autoPlay) {
+        autoplayBtn.classList.add('bg-white/20');
+        autoplayBtn.setAttribute('title', 'Auto-slide Pause korun');
+        autoplayBtn.innerHTML = '<i data-lucide="pause" class="w-4 h-4"></i>';
+        startAutoPlay();
+      } else {
+        autoplayBtn.classList.remove('bg-white/20');
+        autoplayBtn.setAttribute('title', 'Auto-slide Play korun');
+        autoplayBtn.innerHTML = '<i data-lucide="play" class="w-4 h-4 fill-white"></i>';
+        stopAutoPlay();
+      }
+      lucide.createIcons();
+    });
+
+    likeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      liked[activeIndex] = !liked[activeIndex];
+      renderCarousel();
+    });
+
+    // Unified Hand Drag & Swipe Gesture Event Handlers
+    function handleDragStart(clientX) {
+      isDragging = true;
+      dragStartX = clientX;
+    }
+
+    function handleDragEnd(clientX) {
+      if (!isDragging) return;
+      const diffX = dragStartX - clientX;
+      const swipeThreshold = 55; // pixels trigger action threshold
+
+      if (Math.abs(diffX) > swipeThreshold) {
+        if (diffX > 0) {
+          navigate('next');
+        } else {
+          navigate('prev');
+        }
+      }
+      isDragging = false;
+    }
+
+    // Touch listeners (Mobile context)
+    mainContainer.addEventListener('touchstart', (e) => {
+      handleDragStart(e.touches[0].clientX);
+    }, { passive: true });
+
+    mainContainer.addEventListener('touchend', (e) => {
+      handleDragEnd(e.changedTouches[0].clientX);
+    }, { passive: true });
+
+    // Mouse drag listeners (Desktop context)
+    mainContainer.addEventListener('mousedown', (e) => {
+      // Button bar triggers, dots, and link ignore
+      if (e.target.closest('button') || e.target.closest('a')) return;
+      handleDragStart(e.clientX);
+    });
+
+    mainContainer.addEventListener('mouseup', (e) => {
+      if (!isDragging) return;
+      handleDragEnd(e.clientX);
+    });
+
+    mainContainer.addEventListener('mouseleave', () => {
+      isDragging = false;
+    });
+
+    // Keyboard Arrow Keys support
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') navigate('next');
+      if (e.key === 'ArrowLeft') navigate('prev');
+    });
+
+    // Load setup
+    window.addEventListener('DOMContentLoaded', () => {
+      createCarouselStructure();
+      renderCarousel();
+      startAutoPlay();
+      lucide.createIcons();
+    });
   </script>
 </body>
-    </html>
+  </html>

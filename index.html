@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>arian00001 • 3D Toy Universe</title>
+  <!-- Lucide icons (static copy) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Fonts: Anton + Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #111;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+    .font-anton {
+      font-family: 'Anton', sans-serif;
+    }
+    .font-inter {
+      font-family: 'Inter', sans-serif;
+    }
+    .figurine-shadow {
+      filter: drop-shadow(0 25px 35px rgba(0, 0, 0, 0.45));
+    }
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+      100% { transform: translateY(0px); }
+    }
+    .float-active {
+      animation: float 4.5s ease-in-out infinite;
+    }
+    #app-root {
+      width: 100%;
+      height: 100%;
+    }
+    /* custom resets for buttons */
+    button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      outline: none;
+    }
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+  </style>
+</head>
+<body>
+  <div id="app-root"></div>
+
+  <script type="module">
+    import React, { useState, useEffect, useRef } from 'https://esm.sh/react@18';
+    import { createRoot } from 'https://esm.sh/react-dom@18/client';
+    import { ArrowLeft, ArrowRight, Sparkles, ShoppingBag, Share2, Heart, Play, Pause } from 'https://esm.sh/lucide-react@0.263.1';
+
+    // ----- Character data (unchanged) -----
+    const IMAGES = [
+      { 
+        src: 'https://fifth-gentle-45902158.figma.site/_components/v2/4de492f6d9cf8244ad5293233e5c6f52407d42fc/1.02464a56.png', 
+        bg: '#F4845F', 
+        panel: '#F79B7F',
+        name: 'CROWNED FOX',
+        id: 'AR-001',
+        edition: 'Prothom Edition 1/500'
+      },
+      { 
+        src: 'https://fifth-gentle-45902158.figma.site/_components/v2/4de492f6d9cf8244ad5293233e5c6f52407d42fc/2.b977faab.png', 
+        bg: '#6BBF7A', 
+        panel: '#85CC92',
+        name: 'TOON CAT',
+        id: 'AR-002',
+        edition: 'Oshadharon Gold Edition'
+      },
+      { 
+        src: 'https://fifth-gentle-45902158.figma.site/_components/v2/4de492f6d9cf8244ad5293233e5c6f52407d42fc/3.4df853b4.png', 
+        bg: '#E882B4', 
+        panel: '#ED9DC4',
+        name: "LIL' MONSTER",
+        id: 'AR-003',
+        edition: 'Limited Holographic'
+      },
+      { 
+        src: 'https://fifth-gentle-45902158.figma.site/_components/v2/4de492f6d9cf8244ad5293233e5c6f52407d42fc/4.4457fbce.png', 
+        bg: '#6EB5FF', 
+        panel: '#8DC4FF',
+        name: 'AQUABOT V1',
+        id: 'AR-004',
+        edition: 'Special Cyber Edition'
+      },
+    ];
+
+    function App() {
+      const [activeIndex, setActiveIndex] = useState(0);
+      const [isAnimating, setIsAnimating] = useState(false);
+      const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
+      const [liked, setLiked] = useState(Array(IMAGES.length).fill(false));
+      const [autoPlay, setAutoPlay] = useState(true);
+      const touchStartX = useRef(null);
+
+      // resize handler
+      useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 640);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+      }, []);
+
+      // preload images
+      useEffect(() => {
+        IMAGES.forEach((img) => {
+          const image = new Image();
+          image.src = img.src;
+        });
+      }, []);
+
+      // auto-slide
+      useEffect(() => {
+        if (!autoPlay) return;
+        const timer = setInterval(() => {
+          if (!isAnimating) navigate('next');
+        }, 4000);
+        return () => clearInterval(timer);
+      }, [activeIndex, isAnimating, autoPlay]);
+
+      const navigate = (direction) => {
+        if (isAnimating) return;
+        setIsAnimating(true);
+        setActiveIndex((prev) => {
+          if (direction === 'next') return (prev + 1) % IMAGES.length;
+          return (prev + IMAGES.length - 1) % IMAGES.length;
+        });
+        setTimeout(() => setIsAnimating(false), 650);
+      };
+
+      // keyboard
+      useEffect(() => {
+        const handleKey = (e) => {
+          if (e.key === 'ArrowRight') navigate('next');
+          if (e.key === 'ArrowLeft') navigate('prev');
+        };
+        window.addEventListener('keydown', handleKey);
+        return () => window.removeEventListener('keydown', handleKey);
+      }, [isAnimating]);
+
+      // touch
+      const handleTouchStart = (e) => {
+        touchStartX.current = e.touches[0].clientX;
+      };
+      const handleTouchEnd = (e) => {
+        if (touchStartX.current === null) return;
+        const diff = touchStartX.current - e.changedTouches[0].clientX;
+        if (Math.abs(diff) > 50) {
+          if (diff > 0) navigate('next');
+          else navigate('prev');
+        }
+        touchStartX.current = null;
+      };
+
+      const toggleLike = (index) => {
+        setLiked(prev => {
+          const updated = [...prev];
+          updated[index] = !updated[index];
+          return updated;
+        });
+      };
+
+      const getRole = (index) => {
+        if (index === activeIndex) return 'center';
+        if (index === (activeIndex + 3) % IMAGES.length) return 'left';
+        if (index === (activeIndex + 1) % IMAGES.length) return 'right';
+        return 'back';
+      };
+
+      const activeData = IMAGES[activeIndex];
+
+      return (
+        <div 
+          className="relative w-full h-screen overflow-hidden font-inter select-none"
+          style={{
+            backgroundColor: activeData.bg,
+            transition: 'background-color 650ms cubic-bezier(0.4, 0, 0.2, 1)',
+          }}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
+          {/* film grain overlay */}
+          <div 
+            className="absolute inset-0 pointer-events-none z-[50]"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+              backgroundSize: '200px 200px',
+              opacity: 0.08,
+            }}
+          />
+
+          <div className="relative w-full h-full overflow-hidden flex flex-col justify-between p-4 sm:p-8">
+            {/* Header */}
+            <div className="flex justify-between items-center z-[60] w-full mt-2 sm:mt-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-white p-1 flex items-center justify-center shadow-md overflow-hidden">
+                  <img 
+                    src="https://i.ibb.co.com/k285MgPt/Picsart-26-06-10-00-26-14-559.png" 
+                    alt="arian00001 logo" 
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-sm font-black uppercase text-white tracking-[0.18em] leading-none">arian00001</span>
+                  <span className="text-[9px] text-white/80 font-semibold tracking-wider mt-0.5">3D TOY UNIVERSE</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => setAutoPlay(!autoPlay)}
+                  className={`w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-white transition-all duration-200 ${autoPlay ? 'bg-white/20' : 'hover:bg-white/10'}`}
+                  title={autoPlay ? "Auto-slide Pause" : "Auto-slide Play"}
+                >
+                  {autoPlay ? React.createElement(Pause, {className:"w-4 h-4"}) : React.createElement(Play, {className:"w-4 h-4 fill-white"})}
+                </button>
+                <button 
+                  onClick={() => toggleLike(activeIndex)}
+                  className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-white hover:bg-white/10 active:scale-90 transition-all duration-200"
+                >
+                  {React.createElement(Heart, {
+                    className: `w-5 h-5 transition-transform duration-300 ${liked[activeIndex] ? 'fill-white scale-125' : ''}`
+                  })}
+                </button>
+                <button className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-white hover:bg-white/10 active:scale-90 transition-all duration-200">
+                  {React.createElement(Share2, {className:"w-5 h-5"})}
+                </button>
+                <button className="hidden md:flex items-center gap-2 bg-white text-neutral-900 font-semibold px-5 py-2.5 rounded-full shadow-lg text-sm hover:bg-neutral-100 transition-all active:scale-95">
+                  {React.createElement(ShoppingBag, {className:"w-4 h-4"})}
+                  <span>PRE-ORDER BOX</span>
+                </button>
+              </div>
+            </div>
+
+            {/* giant bg text */}
+            <div className="absolute inset-x-0 flex items-center justify-center pointer-events-none select-none z-[2]" style={{ top: '18%' }}>
+              <span 
+                className="font-anton uppercase tracking-[-0.02em] leading-none whitespace-nowrap text-white"
+                style={{ fontSize: 'clamp(90px, 28vw, 380px)', opacity: 0.15 }}
+              >
+                3D SHAPE
+              </span>
+            </div>
+
+            {/* left catalogue info (desktop) */}
+            <div className="absolute top-[34%] left-12 hidden lg:flex flex-col gap-1 z-[1] pointer-events-none text-white/20">
+              <span className="text-[10px] tracking-widest uppercase">CATALOGUE S-NO //</span>
+              <span className="font-anton text-4xl">{activeData.id}</span>
+              <span className="text-[10px] tracking-widest mt-2">{activeData.edition}</span>
+            </div>
+
+            {/* Carousel figures */}
+            <div className="absolute inset-0 z-[3] overflow-hidden pointer-events-none">
+              {IMAGES.map((item, index) => {
+                const role = getRole(index);
+                const isActive = role === 'center';
+                let positionStyles = {};
+
+                if (role === 'center') {
+                  positionStyles = {
+                    transform: `translateX(-50%) scale(${isMobile ? 1.25 : 1.68})`,
+                    filter: 'blur(0px)',
+                    opacity: 1,
+                    zIndex: 20,
+                    left: '50%',
+                    height: isMobile ? '60%' : '92%',
+                    bottom: isMobile ? '22%' : '0',
+                  };
+                } else if (role === 'left') {
+                  positionStyles = {
+                    transform: 'translateX(-50%) scale(1)',
+                    filter: 'blur(2.5px)',
+                    opacity: 0.85,
+                    zIndex: 10,
+                    left: isMobile ? '20%' : '30%',
+                    height: isMobile ? '16%' : '28%',
+                    bottom: isMobile ? '32%' : '12%',
+                  };
+                } else if (role === 'right') {
+                  positionStyles = {
+                    transform: 'translateX(-50%) scale(1)',
+                    filter: 'blur(2.5px)',
+                    opacity: 0.85,
+                    zIndex: 10,
+                    left: isMobile ? '80%' : '70%',
+                    height: isMobile ? '16%' : '28%',
+                    bottom: isMobile ? '32%' : '12%',
+                  };
+                } else {
+                  positionStyles = {
+                    transform: 'translateX(-50%) scale(1)',
+                    filter: 'blur(4px)',
+                    opacity: 0.4,
+                    zIndex: 5,
+                    left: '50%',
+                    height: isMobile ? '13%' : '22%',
+                    bottom: isMobile ? '32%' : '12%',
+                  };
+                }
+
+                return (
+                  <div
+                    key={index}
+                    className="absolute pointer-events-auto transition-all cursor-grab active:cursor-grabbing"
+                    style={{
+                      aspectRatio: '0.6 / 1',
+                      willChange: 'transform, filter, opacity, left, bottom, height',
+                      transitionDuration: '650ms',
+                      transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
+                      ...positionStyles,
+                    }}
+                  >
+                    <div className={`relative w-full h-full flex flex-col justify-end items-center ${isActive ? 'float-active' : ''}`}>
+                      <div 
+                        className="absolute bottom-0 rounded-full blur-sm transition-all duration-500"
+                        style={{
+                          width: '85%',
+                          height: '24px',
+                          backgroundColor: item.panel,
+                          opacity: isActive ? 0.95 : 0.4,
+                          transform: isActive ? 'scale(1.15) translateY(4px)' : 'scale(0.85) translateY(0px)',
+                          boxShadow: `0 12px 36px ${item.panel}, 0 -4px 10px rgba(0,0,0,0.2) inset`,
+                          zIndex: 1,
+                        }}
+                      />
+                      <img
+                        src={item.src}
+                        alt={item.name}
+                        draggable={false}
+                        className="relative z-10 w-full h-full object-contain object-bottom select-none figurine-shadow"
+                      />
+                      {isActive && (
+                        <div className="absolute -bottom-5 sm:-bottom-8 z-30 flex flex-col items-center bg-white/10 backdrop-blur-md border border-white/25 px-3 py-1 rounded-full text-white text-[10px] tracking-widest font-semibold uppercase shadow-md">
+                          {item.name}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Footer controls */}
+            <div className="relative w-full flex flex-col sm:flex-row justify-between items-end z-[60] mt-auto pb-4 sm:pb-0">
+              <div className="max-w-[320px] text-white flex flex-col items-start w-full sm:mb-8 sm:ml-16">
+                <div className="flex items-center gap-2 mb-1 opacity-75">
+                  <span className="text-[11px] font-bold tracking-widest">0{activeIndex + 1}</span>
+                  <div className="w-8 h-[2px] bg-white/40" />
+                  <span className="text-[11px] font-bold tracking-widest opacity-60">0{IMAGES.length}</span>
+                </div>
+                <h2 className="text-xl sm:text-[22px] font-extrabold uppercase tracking-widest mb-2 sm:mb-3 opacity-[0.95] drop-shadow-sm">
+                  arian00001 figurines
+                </h2>
+                <p className="hidden sm:block text-xs sm:text-sm text-white/85 leading-relaxed mb-4 sm:mb-5 drop-shadow-sm font-medium">
+                  Ei toy figurine-gulo khubee darun! Eder premium build quality ebong nikhut high-definition design chokh jorano. Ekhoni apnar favorite character-ti collect korun!
+                </p>
+                <div className="flex items-center gap-3.5">
+                  <button onClick={() => navigate('prev')} className="w-12 h-12 sm:w-16 sm:h-16 rounded-full border-2 border-white/90 bg-transparent text-white flex items-center justify-center transition-all duration-200 hover:scale-[1.08] hover:bg-white/15 active:scale-95 shadow-md">
+                    {React.createElement(ArrowLeft, {className:"w-6 h-6 sm:w-[26px] sm:h-[26px]", style:{strokeWidth:2.25}})}
+                  </button>
+                  <button onClick={() => navigate('next')} className="w-12 h-12 sm:w-16 sm:h-16 rounded-full border-2 border-white/90 bg-transparent text-white flex items-center justify-center transition-all duration-200 hover:scale-[1.08] hover:bg-white/15 active:scale-95 shadow-md">
+                    {React.createElement(ArrowRight, {className:"w-6 h-6 sm:w-[26px] sm:h-[26px]", style:{strokeWidth:2.25}})}
+                  </button>
+                </div>
+              </div>
+
+              <div className="mt-6 sm:mt-0 sm:mb-8 sm:mr-6 w-full sm:w-auto flex justify-end">
+                <a href="#discover" onClick={(e) => e.preventDefault()} className="group flex items-center gap-3 text-white transition-all duration-200 hover:opacity-100 opacity-95 no-underline active:scale-98">
+                  <span className="font-anton uppercase tracking-[-0.02em] leading-none" style={{ fontSize: 'clamp(24px, 4.5vw, 56px)' }}>
+                    DEKHUN EKHONI
+                  </span>
+                  <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-full bg-white/10 group-hover:bg-white text-white group-hover:text-neutral-950 flex items-center justify-center transition-all duration-300 transform group-hover:translate-x-1.5 shadow-md border border-white/20 group-hover:border-transparent">
+                    {React.createElement(ArrowRight, {className:"w-5 h-5 sm:w-8 sm:h-8", style:{strokeWidth:2.25}})}
+                  </div>
+                </a>
+              </div>
+            </div>
+
+            {/* dot indicators */}
+            <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex items-center gap-2 z-[60]">
+              {IMAGES.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => {
+                    if (!isAnimating) {
+                      setIsAnimating(true);
+                      setActiveIndex(i);
+                      setTimeout(() => setIsAnimating(false), 650);
+                    }
+                  }}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                    i === activeIndex ? 'w-6 bg-white' : 'w-1.5 bg-white/40 hover:bg-white/70'
+                  }`}
+                  aria-label={`Slide ${i+1}`}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Mount React app
+    const container = document.getElementById('app-root');
+    const root = createRoot(container);
+    root.render(React.createElement(App));
+  </script>
+</body>
+    </html>
